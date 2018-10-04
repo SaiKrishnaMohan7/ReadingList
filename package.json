@@ -1,0 +1,24 @@
+{
+  "name": "readinglist",
+  "version": "1.0.0",
+  "description": "A reading list app",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SaiKrishnaMohan7/ReadingList.git"
+  },
+  "author": "Sai Krishna Mohan",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SaiKrishnaMohan7/ReadingList/issues"
+  },
+  "homepage": "https://github.com/SaiKrishnaMohan7/ReadingList#readme",
+  "dependencies": {
+    "express": "^4.16.3",
+    "express-graphql": "^0.6.12",
+    "graphql": "^14.0.2"
+  }
+}
