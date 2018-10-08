@@ -4,7 +4,8 @@ const {
   GraphQLString,
   GraphQLSchema,
   GraphQLID,
-  GraphQLInt
+  GraphQLInt,
+  GraphQLList
 } = graphql;
 const _  = require('lodash');
 
@@ -24,6 +25,7 @@ let dummyAuthor = [
   {name: 'Eoin Colfer', age: 55, id: '3'}
 ];
 
+
 // Relating the two types, parent is the book object that is returned
 // which is used to the query object
 const BookType = new GraphQLObjectType({
@@ -37,9 +39,7 @@ const BookType = new GraphQLObjectType({
       resolve(parent, args) {
         return _.find(dummyAuthor, {id: parent.authorId});
       }
-    },
-    authorId: {type: GraphQLID},
-    authorName: {type: GraphQLString}
+    }
   })
 });
 
@@ -48,7 +48,15 @@ const AuthorType = new GraphQLObjectType({
   fields: () => ({
     name: {type: GraphQLString},
     age: {type: GraphQLInt},
-    id: {type: GraphQLID}
+    id: {type: GraphQLID},
+    books: {
+      type: new GraphQLList(BookType),
+      resolve(parent, args){
+        return dummyData.filter((book) => {
+          return book.authorId === parent.id;
+        });
+      }
+    }
   })
 });
 
@@ -72,17 +80,13 @@ const RootQuery = new GraphQLObjectType({
     author: {
       type: AuthorType,
       args: {
-        id: {
-          type: GraphQLID
+          id: {
+            type: GraphQLID
+          },
         },
-        // name: {
-        //   type: GraphQLString
-        // }
-      },
-      resolve(parent, args) {
-        // return _.find(dummyAuthor, {name: args.name});
-        return _.find(dummyAuthor, {name: args.id});
-      }
+        resolve(parent, args) {
+          return _.find(dummyAuthor, {id: args.id});
+        }
     }
   }
 });
