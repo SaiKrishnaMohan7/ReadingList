@@ -5,26 +5,13 @@ const {
   GraphQLSchema,
   GraphQLID,
   GraphQLInt,
-  GraphQLList
+  GraphQLList,
+  GraphQLNonNull
 } = graphql;
 const _  = require('lodash');
 
-
-let dummyData = [
-  {id: '1', name: 'HP1', genre: 'Fantasy', authorId: '1'},
-  {id: '2', name: 'Eragon', genre: 'Fantasy', authorId: '2'},
-  {id: '3', name: 'Artemis Fowl', genre: 'Fantasy', authorId: '3'},
-  {id: '1', name: 'HP2', genre: 'Fantasy', authorId: '1'},
-  {id: '2', name: 'Elder', genre: 'Fantasy', authorId: '2'},
-  {id: '3', name: 'Artemis Fowl 2', genre: 'Fantasy', authorId: '3'}
-];
-
-let dummyAuthor = [
-  {name: 'J.K. Rowling', age: 50, id: '1'},
-  {name: 'Christopher Paolini', age: 44, id: '2'},
-  {name: 'Eoin Colfer', age: 55, id: '3'}
-];
-
+const Book = require('../models/book');
+const Author = require('../models/author');
 
 // Relating the two types, parent is the book object that is returned
 // which is used to the query object
@@ -37,7 +24,7 @@ const BookType = new GraphQLObjectType({
     author: {
       type: AuthorType,
       resolve(parent, args) {
-        return _.find(dummyAuthor, {id: parent.authorId});
+        return Author.findById(parent.authorId);
       }
     }
   })
@@ -52,9 +39,7 @@ const AuthorType = new GraphQLObjectType({
     books: {
       type: new GraphQLList(BookType),
       resolve(parent, args){
-        return dummyData.filter((book) => {
-          return book.authorId === parent.id;
-        });
+        return Book.find({authorId: parent.id});
       }
     }
   })
@@ -74,7 +59,7 @@ const RootQuery = new GraphQLObjectType({
         },
       resolve(parent, args) {
         // code to get data from db
-        return _.find(dummyData, {id: args.id});
+        return Book.findById(args.id);
       }
     },
     author: {
@@ -85,24 +70,75 @@ const RootQuery = new GraphQLObjectType({
           },
         },
         resolve(parent, args) {
-          return _.find(dummyAuthor, {id: args.id});
+          return Author.findById(args.id);
         }
     },
     authors: {
       type: new GraphQLList(AuthorType),
       resolve(){
-        return dummyAuthor;
+        return Author.find({});
       }
     },
     books: {
       type: new GraphQLList(BookType),
       resolve(){
-        return dummyData;
+        return Book.find({});
+      }
+    }
+  }
+});
+
+const Mutation = new GraphQLObjectType({
+  name: 'Mutation',
+  fields: {
+    addAuthor: {
+      type: AuthorType,
+      args: {
+        name: {
+          type: new GraphQLNonNull(GraphQLString)
+        },
+        age: {
+          type: new GraphQLNonNull(GraphQLInt)
+        }
+      },
+      resolve(parent, args) {
+        let author = new Author({
+          name: args.name,
+          age: args.age
+        });
+
+        // mongoose model returns saved obj, it'd be nice to see this on graphiql too hence return
+        // or you see { "data": { "addAuthor": null } }
+        return author.save();
+      }
+    },
+    addBook: {
+      type: BookType,
+      args: {
+        name: {
+          type: new GraphQLNonNull(GraphQLString)
+        },
+        genre: {
+          type: new GraphQLNonNull(GraphQLString)
+        },
+        authorId: {
+          type: new GraphQLNonNull(GraphQLID)
+        }
+      },
+      resolve(parent, args) {
+        let book = new Book({
+          name: args.name,
+          genre: args.genre,
+          authorId: args.authorId
+        });
+
+        return book.save();
       }
     }
   }
 });
 
 module.exports = new GraphQLSchema({
-  query: RootQuery
+  query: RootQuery,
+  mutation: Mutation
 });
