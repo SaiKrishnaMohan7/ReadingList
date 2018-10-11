@@ -47,6 +47,9 @@ class AddBook extends Component {
   formSubmitionHandler(e){
     e.preventDefault();
 
+    // addBook is available on props, compose and graphql!
+    // variables poperty, the vars the query accepts
+    // refetchQueries, queries that need to be re run to force render
     this.props.addBook({
       variables: {
         name: this.state.name,
