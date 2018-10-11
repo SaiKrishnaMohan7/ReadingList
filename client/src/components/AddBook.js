@@ -1,7 +1,10 @@
 import React, { Component } from 'react';
-import { graphql } from 'react-apollo';
+import { graphql, compose } from 'react-apollo';
 
 import { getAllAuthors } from './../queries/queries';
+import { getAllBooks } from './../queries/queries';
+import { addBook } from './../mutations/mutations';
+
 
 class AddBook extends Component {
   
@@ -15,7 +18,7 @@ class AddBook extends Component {
   };
 
   displayAuthors(){
-    let data = this.props.data;
+    let data = this.props.getAllAuthors;
 
     if (data.loading){
       return (<option disabled>Loading...</option>);
@@ -43,8 +46,19 @@ class AddBook extends Component {
 
   formSubmitionHandler(e){
     e.preventDefault();
-    console.log(this.state);
-  }
+
+    // addBook is available on props, compose and graphql!
+    // variables poperty, the vars the query accepts
+    // refetchQueries, queries that need to be re run to force render
+    this.props.addBook({
+      variables: {
+        name: this.state.name,
+        genre: this.state.genre,
+        authorId: this.state.authorId
+      },
+      refetchQueries: [{query: getAllBooks}]
+    });
+  };
 
   render() {
     return (
@@ -55,12 +69,14 @@ class AddBook extends Component {
               onChange={this.bookNameChangeHandler.bind(this)}
             />
         </div>
+
         <div className="field">
             <label>Genre:</label>
             <input type="text"
               onChange={this.bookGenreChangeHandler.bind(this)}
             />
         </div>
+
         <div className="field">
             <label>Author:</label>
             <select onChange={this.bookAuthorChangeHandler.bind(this)}>
@@ -75,4 +91,7 @@ class AddBook extends Component {
   }
 }
 
-export default graphql(getAllAuthors)(AddBook);
+export default compose(
+  graphql(getAllAuthors, { name: "getAllAuthors" }),
+  graphql(addBook, { name: "addBook"})
+)(AddBook);
