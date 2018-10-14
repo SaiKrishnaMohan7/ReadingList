@@ -16,3 +16,20 @@ export const getAllAuthors  = gql`
       name
     }
   }`;
+
+export const getBook = gql`
+  query($id: ID){
+    book(id: $id){
+      id
+      name
+      author{
+        name
+        age
+        books{
+          name
+          id
+        }
+      }
+    }
+  }
+`;
