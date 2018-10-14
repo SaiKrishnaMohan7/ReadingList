@@ -32,8 +32,7 @@ class BookDetails extends Component {
 
     return (
       <div id="book-details">
-        {this.displayBookDetails()}
-        <p>Book Details</p>
+      {this.displayBookDetails()}
       </div>
     );
   }
